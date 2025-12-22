@@ -295,7 +295,6 @@ class Window1(QtWidgets.QWidget):
     def CompileVars(self):
 
         self.UpdatePropList()
-        debugpy.breakpoint()
 
         c=0
         for XObject in reversed(Objects):# cycles from last to first, so when an object is deleted, the sequence is broken
