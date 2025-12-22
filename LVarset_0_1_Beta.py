@@ -15,7 +15,13 @@
 
 import debugpy
 import FreeCAD, FreeCADGui
-from PySide import QtCore, QtGui, QtWidgets, QtUiTools
+
+try:
+    from PySide6 import QtCore, QtGui, QtWidgets, QtUiTools
+except ImportError:
+    from PySide2 import QtCore, QtGui, QtWidgets, QtUiTools
+
+
 QUiLoader = QtUiTools.QUiLoader
 QFile = QtCore.QFile
 Qt = QtCore.Qt
@@ -77,7 +83,7 @@ else:
 
 
     msgBox.setStandardButtons(QtWidgets.QMessageBox.Ok)
-    ret = msgBox.exec_()
+    ret = msgBox.exec()
     LVarset=App.activeDocument().addObject('App::VarSet','LVarset') # adds a varset named LVarset
 
 #*********************** ************************************************
@@ -162,14 +168,21 @@ class Window1(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
         ui_path = Path(__file__).parent / "LVarset.ui"
+
         if not ui_path.exists():
-            return
-        loader = QtUiTools.QUiLoader()
+            raise FileNotFoundError(f"UI file not found: {ui_path}")
         ui_file = QtCore.QFile(str(ui_path))
+
         if not ui_file.open(QtCore.QFile.ReadOnly):
-            return
+            raise RuntimeError("Cannot open UI file")
+
+        loader = QtUiTools.QUiLoader()
         self.ui = loader.load(ui_file, self)
         ui_file.close()
+        
+        if self.ui is None:
+            raise RuntimeError("Failed to load UI file")
+        
         self.ui.setSizePolicy(
             QtWidgets.QSizePolicy.Expanding,
             QtWidgets.QSizePolicy.Expanding)
