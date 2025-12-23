@@ -29,9 +29,8 @@ from pathlib import Path
 if FreeCAD.ActiveDocument is None:
     QtWidgets.QMessageBox.critical(
         None, "LVarset",
-        "No active document.\nPlease open or create a document first."
-)
-    return
+        "No active document.\nPlease open or create a document first.")
+
 d=FreeCAD.ActiveDocument
 
 
@@ -54,7 +53,7 @@ AllowedProperties = [
 #*******  CREDITS AND CREATION OF LVarsets  *********
 #**************************************************
 if FreeCAD.ActiveDocument.getObject("LVarset"):
-    LVarset=FreeCAD.ActiveDocument.getObject("LVarset")
+    LVarset = FreeCAD.ActiveDocument.getObject("LVarset")
 else:
     msgBox = QtWidgets.QMessageBox()
     msgBox.setText(''''
@@ -66,10 +65,10 @@ else:
 # This program is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
 # Version 3
-# This software uses PySide2 (Qt for Python)
+# This software uses PySide6 (Qt for Python)
 # released under the LGPL v3 license and developed by The
 # Qt Company.
-# This program is a beta version, and is distribuited
+# This program is a BETA version, and is distribuited
 #       WITHOUT ANY WARRANTY.
 # The source code of this software remains
 # the property of the author.''')
@@ -84,16 +83,16 @@ else:
 #***********************************************************************
 # at the end Objects will contain all the permitted objects in the drawing
 # that have at least one property still to be inserted in the LVarset Objects
-Object=[]
-Objects=[]
-NOgg=len(FreeCAD.ActiveDocument.Objects)
-Counter =0
+Object = []
+Objects = []
+NOgg = len(FreeCAD.ActiveDocument.Objects)
+Counter = 0
 
 for x in range(NOgg): # cycle through all objects
     XObject=d.Objects[x]
     type_name = XObject.TypeId.split("::")[-1]
     if type_name in NotAllowedObjects:
-    continue# if it is a not allowed object, ignore it
+        continue# if it is a not allowed object, ignore it
 
     for i in range(len(XObject.PropertiesList)): # cycle through all properties of that object
         Property = XObject.PropertiesList[i]
@@ -122,35 +121,35 @@ for x in range(NOgg): # cycle through all objects
                     continue # It is a constraint but not modifiable, e.g., ConstraintCoincident. Move on to the next property.
                 try: XObject.Constraints[ii].Driven
                 except:
-                    pass # okproperty modifiable
+                    pass # ok property modifiable
                 else:
                     continue # it's a constraint, it's writable data, but it's blocked, move on to another property
-                Data=str(XObject.getDatum(ii))
-                x=Data.find(" ")
-                Data=Data[:x]# removes space and unit
+                Data = str(XObject.getDatum(ii))
+                x = Data.find(" ")
+                Data = Data[:x]# removes space and unit
                 if XObject.Constraints[ii].Name:
                     if not f"{XObject.Name}{XObject.Constraints[ii].Name}" in LVarset.PropertiesList:
                         Object.append([f"{XObject.Constraints[ii].Name}",Data,0])# no property, adding to object
-                        Counter +=1 # a Property has been added
+                        Counter += 1 # a Property has been added
                 elif not f"{XObject.Name}{XObject.Constraints[ii]}" in LVarset.PropertiesList:
-                    Object.append([f"Constraint{ii+1}",Data,0]) # no alias add to object
-                    Counter +=1
+                    Object.append([f"Constraint{ii+1}",Data,0]) # non in varset add to object
+                    Counter += 1
         else:
             if not f"{XObject.Name}{Property}" in LVarset.PropertiesList:
-                    Dato=str(getattr(XObject,Property)) # se Alias NON e' gia' presente nel foglio
-                    x=Dato.find(" ")
+                    Data = str(getattr(XObject,Property)) # se Property NON e' gia' presente nel varset
+                    x = Data.find(" ")
                     if x>0:
-                        Dato=Dato[:x]# toglie spazio e unita'
-                    Object.append([Property,Dato,0])
-                    Counter +=1
+                        Data = Data[:x]# toglie spazio e unita'
+                    Object.append([Property,Data,0])
+                    Counter += 1
     if Counter: #if any Properties have been added to Object
         Object.insert(0,["Name",XObject.Name,0])
         Object.insert(0,["Label",XObject.Label.replace("-","").replace("+","").replace(".",""),0])
-        Counter=0# add Data=‘’
+        Counter = 0 # add Data=‘’
         Objects.append(Object)
-    Object=[]
-    Counter =0
-print("creation of Objects ok\n")
+    Object = []
+    Counter = 0
+print ("creation of Objects ok\n")
 
 #***********************************************
 #********  CLASS Window1   ********
@@ -218,10 +217,10 @@ class Window1(QtWidgets.QWidget):
 # sets self.NOgg to 0 (first Object in the list)
     def FillForm(self):
 
-#******************   Fills ComboBox   ++++++++++++++++++++++++++
+#******************   Fill ComboBox   ++++++++++++++++++++++++++
         for Object in Objects:
             self.ObjComb.addItem(f"{Object[0][1]}--{Object[1][1]}")
-            self.NOgg=0
+            self.NOgg = 0
 #******************   Fill QListWidget   ++++++++++++++++++++++++++
         XObject = Objects[self.NOgg]
         self.ListProperties.clear()
@@ -231,7 +230,7 @@ class Window1(QtWidgets.QWidget):
             xitem.setFlags(xitem.flags() | QtCore.Qt.ItemIsUserCheckable)
             xitem.setCheckState(Qt.Unchecked)
 
-#+++++++++++    DeSelTutto    ++++++++++++++++++++++++++
+#+++++++++++    DeselectAll    ++++++++++++++++++++++++++
 #****************************************************************
     def DeselectAll(self):
         for i in range(self.ListProperties.count()):
@@ -261,19 +260,19 @@ class Window1(QtWidgets.QWidget):
         for i in range(self.ListProperties.count()):
             item = self.ListProperties.item(i)
             if item.checkState() == Qt.Checked:
-                Objects[self.NOgg][i+2] [2]=1# flags the Property' of Objects
+                Objects[self.NOgg][i+2] [2] = 1# flags the Property' of Objects
             else:
                 pass
 # ***** clears and writes the properties of the current Object ++++‘’'
         self.ListProperties.clear()
-        self.NOgg= self.ObjComb.currentIndex()#remember the current object
+        self.NOgg = self.ObjComb.currentIndex()#remember the current object
         for x,y,z in Objects[self.NOgg][2:]: #Property starting from the third (excluding Name and Label
-            if z==0:
+            if z == 0:
                 xitem = QtWidgets.QListWidgetItem(str(f"{x}".ljust(30," ") + f" = {y}"))
                 self.ListProperties.addItem(xitem)
                 xitem.setFlags(xitem.flags() | QtCore.Qt.ItemIsUserCheckable)
                 xitem.setCheckState(Qt.Unchecked)
-            elif z==1:
+            elif z == 1:
                 xitem = QtWidgets.QListWidgetItem(str(f"{x}".ljust(30," ") + f" = {y}"))
                 self.ListProperties.addItem(xitem)
                 xitem.setFlags(xitem.flags() | QtCore.Qt.ItemIsUserCheckable)
@@ -293,11 +292,11 @@ class Window1(QtWidgets.QWidget):
         self.UpdatePropList()
 
         c=0
-        for XObject in reversed(Objects):# cycles from last to first, so when an object is deleted, the sequence is broken
+        for XObject in reversed(Objects):
             GroupName = XObject[0][1].replace("-","").replace("+","").replace(".","")
-            x=0 #to check if there are any Properties left to import
+            x = 0 #to check if there are any Properties left to import
             for Property in XObject[2:]: # e.g. [‘Height’, ‘10.0 ’, 0]
-                if Property[2] == 1: # =flagged
+                if Property[2] == 1: # = flagged
 
 #**********************************************************************************				
 #**********            writes Property, in the Varset          ********************
@@ -308,12 +307,12 @@ class Window1(QtWidgets.QWidget):
                         LVarset.addProperty('App::PropertyAngle', f'{XObject[1][1]}AttOffAngle' , GroupName)
                         setattr(LVarset, f'{XObject[1][1]}AttOffAngle',Angle)
 
-                        PosX= d.getObject(XObject[1][1]).AttachmentOffset.Base.x
-                        PosY= d.getObject(XObject[1][1]).AttachmentOffset.Base.y
-                        PosZ= d.getObject(XObject[1][1]).AttachmentOffset.Base.z
+                        PosX = d.getObject(XObject[1][1]).AttachmentOffset.Base.x
+                        PosY = d.getObject(XObject[1][1]).AttachmentOffset.Base.y
+                        PosZ = d.getObject(XObject[1][1]).AttachmentOffset.Base.z
 
                         for i,ii in ((PosX,f'{XObject[1][1]}AttOffPosX'),(PosY,f'{XObject[1][1]}AttOffPosY'),(PosZ,f'{XObject[1][1]}AttOffPosZ')):
-                            PropertyName=ii
+                            PropertyName = ii
                             LVarset.addProperty('App::PropertyFloat', PropertyName , GroupName)
                             setattr(LVarset, PropertyName , i)
                         c += 1
@@ -340,56 +339,55 @@ class Window1(QtWidgets.QWidget):
 #*****************                    writes Formula in Object            ***********************
 #************************************************************************************************					
 
-                    ogg= d.getObject(XObject[1][1])#e.g. ‘Sketch001’
+                    ogg = d.getObject(XObject[1][1])#e.g. ‘Sketch001’
                     if "AttOff" in Property[0] :    # Check if it is an AttachmentOffset
 
                         for i,ii in (('AttachmentOffset.Rotation.Angle',f'LVarset.{XObject[1][1]}AttOffAngle'),('AttachmentOffset.Base.x',f'LVarset.{XObject[1][1]}AttOffPosX'),('AttachmentOffset.Base.y',f'LVarset.{XObject[1][1]}AttOffPosY'),('AttachmentOffset.Base.z',f'LVarset.{XObject[1][1]}AttOffPosZ')):
                             ogg.setExpression(i,ii)
-                            b=0
+                            b = 0
 
                     elif "Placement" in Property[0] :    # Check if it is an Placement
 
                         for i,ii in (('Placement.Rotation.Angle',f'LVarset.{XObject[1][1]}PlacementAngle'),('Placement.Base.x',f'LVarset.{XObject[1][1]}PlacementPosX'),('Placement.Base.y',f'LVarset.{XObject[1][1]}PlacementPosY'),('Placement.Base.z',f'LVarset.{XObject[1][1]}PlacementPosZ')):
                             ogg.setExpression(i,ii)#+++es. Placement.Rotation.Angle , LVarset.SketchPlacementAngle
-                            b=0
+                            b = 0
 
                     else:
                         try:     #check if it is a modifiable constraint
                             ogg.getDatum(Property[0])
                             if "Constraint" in Property[0] :    #e.g. ‘Constraint6’ try to see if the constraint does not have a name
-                                aa=f"Constraints[{int(Property[0][10:])-1}]"
-                                Expression=f'LVarset.{XObject[1][1]}{Property[0]}' #+++es. 
+                                aa = f"Constraints[{int(Property[0][10:])-1}]"
+                                Expression = f'LVarset.{XObject[1][1]}{Property[0]}' #+++es. 
                                 ogg.setExpression(aa,Expression) # e.g. <Sketcher::SketchObject>.setExpression(Constraint[6], ‘LVarset.         Sketch_Constraint6’)
                             else:     # if there isn't Constraintin the name then it's a constraint with a name' like es. 'BoxLenght'
                                 aa=f"Constraints[{ogg.getIndexByName(Property[0])}]"
-                                Expression=f'LVarset.{XObject[1][1]}{Property[0]}' #+++es. 
+                                Expression = f'LVarset.{XObject[1][1]}{Property[0]}' #+++es. 
                                 ogg.setExpression(aa,Expression)
                         except Exception as e:     # if it is not a Constraint(Datum) then it is a Property' type e.g. Value or Occurrence
-                            Expression=f'LVarset.{XObject[1][1]}{Property[0]}' #+++es. 
+                            Expression = f'LVarset.{XObject[1][1]}{Property[0]}' #+++es. 
                             ogg.setExpression(Property[0],Expression)# es. <Sketcher::SketchObject>.setExpression(Largh, 'LVarset.Sketch_Largh')
 
                     #******     removes the Property from Objects so that it is no longer listed   ********
                     Objects[Objects.index(XObject)].remove(Property)
                 else:
                     #*******    otherwise remember not to delete the entire XObject
-                    x =1
+                    x = 1
 
-            if x== 0:
+            if x == 0:
 #******         If there are no more Properties, remove XObject from Objects   ********
                 Objects.remove(XObject)
-            c=3
+            c = 3
         #self.NObject=0
         d.recompute()
         #self.ListProperties.clear()
-        XObject=[]
-        self.XObjects=[]
+        XObject = []
+        self.XObjects = []
 
 
 
         self.ListProperties.clear()
         self.ObjComb.clear()
-        self.NOgg=-1
-        self.FillForm()
+        self.NOgg = -1
 
 #++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
